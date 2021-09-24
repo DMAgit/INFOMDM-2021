@@ -13,21 +13,6 @@ splitGroup2 = data[5:10,:]
 splitLabels1 = classLabels[:5]
 splitLabels2 = classLabels[5:10]
 
-
-
-
-def tree_grow(x, y, nmin: int, minleaf: int, nfeat):
-    
-    bestleftDataSet,bestrightDataSet,bestleftLabelSet,bestrightLabelSet,bestFeatureIndex,bestFeatureSplitValue = get_best_split(x, y)
-
-    currentNode = Node(bestFeatureIndex, bestFeatureSplitValue)
-
-    currentNode.left = tree_grow(bestleftDataSet, bestleftLabelSet)
-    currentNode.right = tree_grow(bestrightDataSet, bestrightLabelSet)
-
-    return currentNode
-
-
 #TODO use the numpy indexing for this instead of the for loop
 def get_current_split(featureIndex, featureSplitValue, data, labels):
     leftDataSet, rightDataSet = [], []
@@ -41,11 +26,11 @@ def get_current_split(featureIndex, featureSplitValue, data, labels):
             rightDataSet.append(dataRow)
             rightLabelSet.append(labels[index])
 
-    return leftDataSet, rightDataSet, leftLabelSet, rightLabelSet
+    return np.asarray(leftDataSet), np.asarray(rightDataSet), np.asarray(leftLabelSet), np.asarray(rightLabelSet)
 
 def gini_index(labels):
     totalTrue = np.sum(labels)
-    totalAmount = len(labels)
+    totalAmount = labels.shape[0]
 
     probTrue = totalTrue / totalAmount
 
@@ -54,11 +39,11 @@ def gini_index(labels):
 
 
 #Use numpy indexing later
-def get_best_split(data, labels):
+def get_best_split(data, labels, minleaf):
 
     rowAmount, featureAmount = data.shape
 
-    bestGiniValue = 1
+    bestGiniValue = float("inf")
     bestleftDataSet = None
     bestrightDataSet = None
     bestleftLabelSet = None
@@ -69,10 +54,14 @@ def get_best_split(data, labels):
     for featureIndex in range(featureAmount):
         featureValuesSorted = np.sort(np.unique(data[:,featureIndex]))
         featureValuesAveraged = (featureValuesSorted[0:-1]+featureValuesSorted[1:rowAmount])/2
-        for splitValue in featureValuesAveraged:
+        for splitValue in featureValuesAveraged:            
             leftDataSet, rightDataSet, leftLabelSet, rightLabelSet = get_current_split(featureIndex, splitValue, data, labels)
-            giniValue = len(leftDataSet) / rowAmount * gini_index(leftLabelSet) + len(rightDataSet)/ rowAmount *  gini_index(rightLabelSet)
-            print("The gini value for featureIndex ", featureIndex, " and splitValue : ", splitValue, " is ",giniValue)
+
+            if leftDataSet.shape[0] < minleaf or rightDataSet.shape[0] < minleaf:
+                continue
+
+            giniValue = leftDataSet.shape[0] / rowAmount * gini_index(leftLabelSet) + rightDataSet.shape[0]/ rowAmount *  gini_index(rightLabelSet)
+            #print("The gini value for featureIndex ", featureIndex, " and splitValue : ", splitValue, " is ",giniValue)
 
             if giniValue < bestGiniValue:
                 bestGiniValue = giniValue
@@ -84,12 +73,57 @@ def get_best_split(data, labels):
                 bestFeatureSplitValue = splitValue
     
 
-    print("The best giniValue was ", bestGiniValue, " with splitValue ", bestFeatureSplitValue)
+    #print("The best giniValue was ", bestGiniValue, " with splitValue ", bestFeatureSplitValue)
 
     return bestleftDataSet,bestrightDataSet,bestleftLabelSet,bestrightLabelSet,bestFeatureIndex,bestFeatureSplitValue
 
+
+
+def tree_grow(x, y, nmin: int, minleaf: int): #, nfeat):
+    
+    bestleftDataSet,bestrightDataSet,bestleftLabelSet,bestrightLabelSet,bestFeatureIndex,bestFeatureSplitValue = get_best_split(x, y, minleaf)
+
+    splitSucceeded = bestleftDataSet is not None
+    print(bestleftDataSet)
+    currentNode = Node(bestFeatureIndex, bestFeatureSplitValue)
+
+    if not splitSucceeded:
+        positiveAmount = sum(y)
+        negativeAmount = y.shape[0] - positiveAmount
+        
+
+        #TODO figure out tie breaker
+        if positiveAmount > negativeAmount:
+            currentNode.finalClassLabel = 1
+        else:
+            currentNode.finalClassLabel = 0
+        print("LEaf")
+        return currentNode
+
+    if bestleftDataSet.shape[0] >= nmin:
+        currentNode.left = tree_grow(bestleftDataSet, bestleftLabelSet, nmin, minleaf)    
+   
+    if bestrightDataSet.shape[0] >= nmin:    
+        currentNode.right = tree_grow(bestrightDataSet, bestrightLabelSet, nmin, minleaf)
+
+    return currentNode
+
 def tree_pred(x, tree):
-    return None
+
+    resultLabels = []
+
+    for row in x:
+        resultClassLabel = tree.predict(row)
+        resultLabels.append(resultClassLabel)
+
+    return resultLabels
+
+
+rootNode = tree_grow(data, classLabels, 2, 1)
+
+
+print(tree_pred(data, rootNode))
+
 
 def tree_grow_b():
     return None

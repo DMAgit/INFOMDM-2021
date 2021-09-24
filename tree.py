@@ -9,12 +9,22 @@ class Node:
         self.left = None
         self.right = None
 
-        self.featureIndex = None
-        self.featureSplitValue = None
+        self.featureIndex = featureIndex
+        self.featureSplitValue = featureSplitValue
+
+        self.finalClassLabel = None
 
 
     def predict(self, dataRow):
-        if dataRow[self.featureIndex] < self.featureSplitValue:
-            return self.left
+
+        if self.finalClassLabel is not None:
+            return self.finalClassLabel
+
+        if self.left is not None:
+            if dataRow[self.featureIndex] < self.featureSplitValue:
+                return self.left.predict(dataRow)
         
-        return self.right
+        if self.right is not None:
+            return self.right.predict(dataRow)
+
+        raise Exception("ERRORRR")
