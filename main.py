@@ -11,11 +11,19 @@ def main():
     x = credit_data[:,:-1]
     y = credit_data[:,-1]
 
-    tree_grow(x, y, 0, 0)
+    tree = tree_grow(x, y, 0, 0)
+
+    # print(tree.predict([x[1]]))
+    # print(y[1])
+
+    print(tree.predict(x))
+    print(y)
 
 def tree_grow(x, y, nmin: int, minleaf: int): #, nfeat):
     tree = DescisionTree()
     tree.construct(x, y, nmin, minleaf)
+
+    return tree
 
 if __name__ == "__main__":
     main()

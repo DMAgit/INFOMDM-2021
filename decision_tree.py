@@ -11,10 +11,15 @@ def gini_index(labels):
 class DescisionTree:
 
     def __init__(self) -> None:
-        rootNode = None
+        self.rootNode = None
 
         self.nmin = 0
         self.minleaf = 0
+    
+    def predict(self, dataRows):
+
+        resultLabels = [self.rootNode.predict(row) for row in dataRows]   
+        return resultLabels
 
     def construct(self, x, y, nmin: int, minleaf: int):
 
@@ -26,9 +31,8 @@ class DescisionTree:
         assert x.shape > (0,0)
         assert x.shape[0] == y.shape[0]
 
-        rootNode = self.grow_tree(x, y)
+        self.rootNode = self.grow_tree(x, y)
         
-    
     #Returns all possible splits
     def getPossibleSplits(self, x, y): #Get all the possinle splits, for all the features
         featureIndices = range(x.shape[1])
@@ -68,22 +72,28 @@ class DescisionTree:
     
     #Grow the tree
     def grow_tree(self, x, y):
-        sampleAmount, featureAmount = x.shape
         allCombinations = self.getPossibleSplits(x,y)
+
+        currentNode = Node()
+        currentNode.setFinalClassLabel(y) #Get the majority vote for each Node
 
         if(len(allCombinations) == 0):
             print("No more possible combinations")
-            return None
+            return currentNode
 
         bestFeatureIndex, bestSplitValue = self.getBestSplit(x,y, allCombinations)
-        print("Best split: ", (bestFeatureIndex, bestSplitValue))
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex, bestSplitValue)) #Since it only happens once every iteration and is written in C no need to cache the results earlier. Redoing it is fine since it improves clean code
-
-        currentNode = Node()
-        currentNode.setSplitFunction(lambda dataRow : dataRow[bestFeatureIndex] < bestSplitValue)
+        
+        if np.all(y == y[0]):
+            print("All labels the same")
+            return currentNode
 
         if len(yLeft) >= self.nmin and len(yRight) >= self.nmin:
-            currentNode.left = self.grow_tree(xLeft, yLeft)
-            currentNode.right = self.grow_tree(xRight, yRight)
+            nodeLeft = self.grow_tree(xLeft, yLeft)
+            nodeRight = self.grow_tree(xRight, yRight)
+
+            currentNode.left = nodeLeft
+            currentNode.right = nodeRight
+            currentNode.setSplitFunction(bestFeatureIndex, bestSplitValue)
 
         return currentNode
