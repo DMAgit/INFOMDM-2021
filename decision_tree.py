@@ -72,21 +72,20 @@ class DescisionTree:
     
     #Grow the tree
     def grow_tree(self, x, y):
-        allCombinations = self.getPossibleSplits(x,y)
-
         currentNode = Node()
         currentNode.setFinalClassLabel(y) #Get the majority vote for each Node
 
+        if np.all(y == y[0]):
+            #print("All labels the same")
+            return currentNode
+
+        allCombinations = self.getPossibleSplits(x,y)
         if(len(allCombinations) == 0):
-            print("No more possible combinations")
+            #print("No more possible combinations")
             return currentNode
 
         bestFeatureIndex, bestSplitValue = self.getBestSplit(x,y, allCombinations)
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex, bestSplitValue)) #Since it only happens once every iteration and is written in C no need to cache the results earlier. Redoing it is fine since it improves clean code
-        
-        if np.all(y == y[0]):
-            print("All labels the same")
-            return currentNode
 
         if len(yLeft) >= self.nmin and len(yRight) >= self.nmin:
             nodeLeft = self.grow_tree(xLeft, yLeft)

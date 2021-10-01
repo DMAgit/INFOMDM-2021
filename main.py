@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from decision_tree import DescisionTree
+from visualiser import Visualiser
 
 DATAPATH = 'data/credit.txt'
 DELIMETER = ','
@@ -16,8 +17,11 @@ def main():
     # print(tree.predict([x[1]]))
     # print(y[1])
 
-    print(tree.predict(x))
-    print(y)
+    visualiser = Visualiser()
+    visualiser.visualiseTree(tree)
+
+    #print(tree.predict(x))
+    #print(y)
 
 def tree_grow(x, y, nmin: int, minleaf: int): #, nfeat):
     tree = DescisionTree()
