@@ -13,7 +13,7 @@ def main():
     x = credit_data[:,:-1]
     y = credit_data[:,-1]
 
-    tree = tree_grow(x, y, 3, 1)
+    tree = tree_grow(x, y, 2, 1)
 
     #Visualise the tree in the console
     visualiser = Visualiser()
@@ -23,7 +23,6 @@ def main():
 def tree_grow(x, y, nmin: int, minleaf: int): #, nfeat):
     tree = DescisionTree()
     tree.construct(x, y, nmin, minleaf)
-
     return tree
 
 if __name__ == "__main__":
