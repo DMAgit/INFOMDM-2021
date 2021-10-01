@@ -12,7 +12,7 @@ def main():
     x = credit_data[:,:-1]
     y = credit_data[:,-1]
 
-    tree = tree_grow(x, y, 0, 0)
+    tree = tree_grow(x, y, 2, 1)
 
     # print(tree.predict([x[1]]))
     # print(y[1])

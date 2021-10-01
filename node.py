@@ -9,7 +9,10 @@ class Node:
 
         self.index = None
         self.splitValue = None
-        self.trainingValues = None
+
+        #Debugging purposes
+        self.trainingValuesIndices = None
+        self.trainingLabels = None
 
     def setChildNodes(self, left, right) -> None:
         self.left = left
@@ -20,7 +23,8 @@ class Node:
         self.splitValue = splitValue
 
     def setFinalClassLabel(self, labels):
-        self.trainingValues = labels
+        self.trainingLabels = labels
+        
         positiveAmount = sum(labels)
         negativeAmount = len(labels) - positiveAmount
 
