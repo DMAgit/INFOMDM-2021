@@ -36,7 +36,6 @@ class DescisionTree:
     #Get all the possible splits, for all the features
     def getPossibleSplits(self, x, y): 
         featureIndices = range(x.shape[1])
-
         possibleSplits = [self.getSplitsPerFeature(x, index) for index in featureIndices]
         
         #Store it in a tuple for easy access
@@ -56,8 +55,9 @@ class DescisionTree:
         bestCombination = allCombinations[np.argmin(allScores)]
         return bestCombination
 
-    #Returns the delta i, without calculating the impurity of current node, so you want the smallest one
+    #Returns the delta i, without calculating the impurity of current node (is constant), so you want the smallest one
     def GetCurrentScore(self, x, y, combination):
+        #TODO probably more efficient to not make the split itself, but use the method as described in the assignment get started
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, combination)
         return gini_index(yLeft) * len(yLeft) / len(y) + gini_index(yRight) * len(yRight) / len(y)
 
@@ -78,14 +78,14 @@ class DescisionTree:
         
         currentNode.trainingValuesIndices = x[:,0] #Debugging values
 
-        if np.all(y == y[0]): #All labels the same            
+        if gini_index(y) == 0: #All labels are the same     
             return currentNode
 
         if len(y) < self.nmin: #The restriction according to the assignment
             return currentNode
 
         allCombinations = self.getPossibleSplits(x,y)
-        if(len(allCombinations) == 0): #No more possible combinations
+        if(len(allCombinations) == 0): #No more possible combinations (needed if nmin = 0)
             return currentNode
 
         #Get the best split and split the data accordingly

@@ -1,4 +1,4 @@
-
+import numpy as np
 
 class Node:
     def __init__(self) -> None:
@@ -28,7 +28,7 @@ class Node:
     def setFinalClassLabel(self, labels):
         self.trainingLabels = labels
         
-        positiveAmount = sum(labels)
+        positiveAmount = np.sum(labels)
         negativeAmount = len(labels) - positiveAmount
 
         #TODO figure out tie breaker
@@ -47,7 +47,7 @@ class Node:
         assert self.right is not None
 
         #Iterate to the next node according to the split value
-        if dataRow[self.index] < self.splitValue:
+        if dataRow[self.index] <= self.splitValue:
             return self.left.predict(dataRow)
         else:
             return self.right.predict(dataRow)
