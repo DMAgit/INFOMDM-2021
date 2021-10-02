@@ -1,6 +1,7 @@
 from node import Node
 import itertools
 import numpy as np
+import sys
 
 #Calculate the gini index as shown in the lecture slides
 def gini_index(labels):
@@ -54,7 +55,7 @@ class DescisionTree:
         allScores = [self.GetCurrentScore(x, y, combination) for combination in allCombinations]
         bestCombination = allCombinations[np.argmin(allScores)]
 
-        if(np.min(allScores) > 100):
+        if(np.min(allScores) == 1000): #Since the reduction can't be more than 1 anyway, this is a sufficient check whether the split is allowed
             return None
 
         return bestCombination
@@ -64,8 +65,9 @@ class DescisionTree:
         #TODO probably more efficient to not make the split itself, but use the method as described in the assignment get started
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, combination)
 
+        #Check the minleaf restriction
         if len(yLeft) < self.minleaf or len(yRight) < self.minleaf:
-            return 1000
+            return 1000 #Since the reduction can't be more than 1 anyway, 1000 is more than sufficient.
 
         return gini_index(yLeft) * len(yLeft) / len(y) + gini_index(yRight) * len(yRight) / len(y)
 
@@ -98,14 +100,14 @@ class DescisionTree:
 
         #Get the best split and split the data accordingly
         bestSplit = self.getBestSplit(x,y, allCombinations)
+
+        #Check if there is an allowed split
         if bestSplit is None:
             return currentNode
 
         bestFeatureIndex, bestSplitValue = bestSplit
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex, bestSplitValue)) #Since it only happens once every iteration and is written in C no need to cache the results earlier. Redoing it is fine since it improves clean code
 
-        #Check the minleaf restriction
-        
         #recursively generate the child nodes aswell
         currentNode.left = self.grow_tree(xLeft, yLeft)
         currentNode.right = self.grow_tree(xRight, yRight)
