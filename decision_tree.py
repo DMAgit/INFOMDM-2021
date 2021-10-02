@@ -51,14 +51,22 @@ class DescisionTree:
 
     #Returns the best splitCombination according to the impurity function
     def getBestSplit(self, x, y, allCombinations):
-        allScores = [self.GetCurrentScore(x, y, combination) for combination in allCombinations]        
+        allScores = [self.GetCurrentScore(x, y, combination) for combination in allCombinations]
         bestCombination = allCombinations[np.argmin(allScores)]
+
+        if(np.min(allScores) > 100):
+            return None
+
         return bestCombination
 
     #Returns the delta i, without calculating the impurity of current node (is constant), so you want the smallest one
     def GetCurrentScore(self, x, y, combination):
         #TODO probably more efficient to not make the split itself, but use the method as described in the assignment get started
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, combination)
+
+        if len(yLeft) < self.minleaf or len(yRight) < self.minleaf:
+            return 1000
+
         return gini_index(yLeft) * len(yLeft) / len(y) + gini_index(yRight) * len(yRight) / len(y)
 
     #Returns the split dataset and labels according to combination
@@ -89,15 +97,19 @@ class DescisionTree:
             return currentNode
 
         #Get the best split and split the data accordingly
-        bestFeatureIndex, bestSplitValue = self.getBestSplit(x,y, allCombinations)
+        bestSplit = self.getBestSplit(x,y, allCombinations)
+        if bestSplit is None:
+            return currentNode
+
+        bestFeatureIndex, bestSplitValue = bestSplit
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex, bestSplitValue)) #Since it only happens once every iteration and is written in C no need to cache the results earlier. Redoing it is fine since it improves clean code
 
         #Check the minleaf restriction
-        if len(yLeft) >= self.minleaf and len(yRight) >= self.minleaf:
-            #recursively generate the child nodes aswell
-            currentNode.left = self.grow_tree(xLeft, yLeft)
-            currentNode.right = self.grow_tree(xRight, yRight)
+        
+        #recursively generate the child nodes aswell
+        currentNode.left = self.grow_tree(xLeft, yLeft)
+        currentNode.right = self.grow_tree(xRight, yRight)
 
-            currentNode.setSplitValues(bestFeatureIndex, bestSplitValue)
+        currentNode.setSplitValues(bestFeatureIndex, bestSplitValue)
 
         return currentNode
