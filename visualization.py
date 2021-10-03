@@ -59,8 +59,7 @@ for i in range(n_nodes):
 tree.plot_tree(clf)
 plt.show()
 
-
-#We can also try this library if the previous one is hard and ambigous to work :)
+# We can also try this library if the previous one is hard and ambiguous to work :)
 
 '''
 import graphviz
