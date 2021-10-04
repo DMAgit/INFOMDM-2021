@@ -4,6 +4,7 @@ from decision_tree import DescisionTree
 from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
 from statistics import mode
+from sklearn.metrics import accuracy_score
 
 DATAPATH = 'data/pimaIndians.txt'
 DELIMETER = ','
@@ -16,15 +17,18 @@ def main():
     x = credit_data[:, :-1]
     y = credit_data[:, -1]
 
-    tree = tree_grow_b(x, y, 20, 5, 4, 10)
+    test_pred_b(x, y, 20, 5, 4, 1)
+    test_pred_b(x, y, 20, 5, 4, 10)
+    test_pred_b(x, y, 20, 5, 4, 100)
 
+    
     # Visualise the tree in the console
     # visualiser = Visualiser()
     # visualiser.visualiseTree(tree)
 
-    predictions = tree_pred_b(tree, x)
+
+    
     # print(predictions)
-    print(confusion_matrix(y, predictions))
 
 
 # Construct and return the tree
@@ -65,6 +69,12 @@ def tree_pred_b(tree_list, x):
 
     return finalResult
 
+def test_pred_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
+    treeList = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
+    baggingPredictions = tree_pred_b(treeList, x)
+    print("m: ",m)
+    print(accuracy_score(y,baggingPredictions))
+    print(confusion_matrix(y, baggingPredictions))
 
 if __name__ == "__main__":
     main()
