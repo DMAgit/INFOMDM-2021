@@ -16,7 +16,7 @@ def main():
     x = credit_data[:, :-1]
     y = credit_data[:, -1]
 
-    tree = tree_grow_b(x, y, 20, 5, 4, 100)
+    tree = tree_grow_b(x, y, 20, 5, 4, 10)
 
     # Visualise the tree in the console
     # visualiser = Visualiser()
@@ -52,13 +52,16 @@ def tree_pred_b(tree_list, x):
     summedResult = list(map(sum, zip(*allResults)))  # get a sum of the results from each tree for each row
     finalResult = []
 
+    # since the outputs are binary, we can use the sum of the output and compare it against the number of models used
+    # if it is more than half of the models, most models voted 1, so we assign it as such
+    # otherwise, most models voted 0, so assign it as a 0
     for i in summedResult:
         # TODO: Tiebreaker
         # TODO: What if you use an odd number of trees
-        if i < len(tree_list)/2:
-            finalResult.append(0)
-        else:  # i >= len(tree_list)/2:
+        if i > len(tree_list)/2:
             finalResult.append(1)
+        else:
+            finalResult.append(0)
 
     return finalResult
 
