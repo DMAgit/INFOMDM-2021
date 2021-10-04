@@ -37,5 +37,22 @@ def tree_pred(x, tr):
     return predictedLabels
 
 
+# Random forests
+def tree_grow_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
+    tree_list = []
+    for i in range(m):
+        tree_list.append(tree_grow(x, y, nmin, minleaf, nfeat))
+    return tree_list  # list of tree objects of len m
+
+
+def tree_pred_b(tree_list, x):
+    # TODO: finish this off, currently it returns all of the predicted labels,
+    #       but (I think) it should return them 1 by 1 (for each row of x).
+    #       This would require to change the tree_pred function and I can't go into it rn :)
+    allResults = []
+    for tree in tree_list:
+        allResults.append(x, tree)
+
+
 if __name__ == "__main__":
     main()
