@@ -17,6 +17,7 @@ class DescisionTree:
         self.rootNode = None
         self.nmin = None
         self.minleaf = None
+        self.nfeat = None
 
     # Make the predictions
     def predict(self, dataRows):
@@ -24,22 +25,41 @@ class DescisionTree:
         return resultLabels
 
     # Construct the trees
-    def construct(self, x, y, nmin: int, minleaf: int):
+    def construct(self, x, y, nmin: int, minleaf: int, nfeat: int):
 
         # Store the parameters
         self.nmin = nmin
         self.minleaf = minleaf
+        self.nfeat = nfeat
 
         # Check whether there is any training data, and whether each data point has a label
         assert x.shape > (0, 0)
         assert x.shape[0] == y.shape[0]
+        # Check that nfeat is more than 0 and isn't a number greater than the number of columns in the data
+        assert 0 < nfeat <= x.shape[1]
 
         self.rootNode = self.grow_tree(x, y)
 
     # Get all the possible splits, for all the features
-    def getPossibleSplits(self, x, y):
-        featureIndices = range(x.shape[1])
-        possibleSplits = [self.getSplitsPerFeature(x, index) for index in featureIndices]
+    def getPossibleSplits(self, x):
+        featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
+        featureIndices.sort()
+        # Choose random indices (columns of x), of size nfeat, without replacement
+
+        # this is unpythonic jank
+        # but it works
+        # :)
+        possibleSplits = []
+        for i in range(x.shape[1]):
+            flag = False
+            for index in featureIndices:
+                if i == index:
+                    possibleSplits.append(self.getSplitsPerFeature(x, index))
+                    flag = True
+                    break
+            if flag:
+                continue
+            possibleSplits.append(np.empty(0))
 
         # Store it in a tuple for easy access
         allCombinations = [(index, splitValue) for index in featureIndices for splitValue in possibleSplits[index]]
@@ -57,9 +77,8 @@ class DescisionTree:
         allScores = [self.GetCurrentScore(x, y, combination) for combination in allCombinations]
         bestCombination = allCombinations[np.argmin(allScores)]
 
-        if (
-                np.min(allScores) == 1000):  # Since the reduction can't be more than 1 anyway, this is a sufficient
-            # check whether the split is allowed
+        if np.min(allScores) == 1000:  # Since the reduction can't be more than 1 anyway,
+            # this is a sufficient check on whether the split is allowed
             return None
 
         return bestCombination
@@ -98,7 +117,7 @@ class DescisionTree:
         if len(y) < self.nmin:  # The restriction according to the assignment
             return currentNode
 
-        allCombinations = self.getPossibleSplits(x, y)
+        allCombinations = self.getPossibleSplits(x)
         if len(allCombinations) == 0:  # No more possible combinations (needed if nmin = 0)
             return currentNode
 
@@ -110,10 +129,9 @@ class DescisionTree:
             return currentNode
 
         bestFeatureIndex, bestSplitValue = bestSplit
-        xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex,
-                                                                   bestSplitValue))  # Since it only happens once
-        # every iteration and is written in C no need to cache the results earlier. Redoing it is fine since it
-        # improves clean code
+        xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, (bestFeatureIndex, bestSplitValue))
+        # Since it only happens once every iteration and is written in C no need to cache the results earlier.
+        # Redoing it is fine since it improves clean code
 
         # recursively generate the child nodes as well
         currentNode.left = self.grow_tree(xLeft, yLeft)
