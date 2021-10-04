@@ -3,6 +3,7 @@ import pandas as pd
 from decision_tree import DescisionTree
 from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
+from statistics import mode
 
 DATAPATH = 'data/pimaIndians.txt'
 DELIMETER = ','
@@ -15,13 +16,14 @@ def main():
     x = credit_data[:, :-1]
     y = credit_data[:, -1]
 
-    tree = tree_grow(x, y, 20, 5, 8)
+    tree = tree_grow_b(x, y, 20, 5, 4, 100)
 
     # Visualise the tree in the console
     # visualiser = Visualiser()
     # visualiser.visualiseTree(tree)
 
-    predictions = tree_pred(x, tree)
+    predictions = tree_pred_b(tree, x)
+    # print(predictions)
     print(confusion_matrix(y, predictions))
 
 
@@ -46,12 +48,19 @@ def tree_grow_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
 
 
 def tree_pred_b(tree_list, x):
-    # TODO: finish this off, currently it returns all of the predicted labels,
-    #       but (I think) it should return them 1 by 1 (for each row of x).
-    #       This would require to change the tree_pred function and I can't go into it rn :)
-    allResults = []
-    for tree in tree_list:
-        allResults.append(x, tree)
+    allResults = [tree_pred(x, tree) for tree in tree_list]
+    summedResult = list(map(sum, zip(*allResults)))  # get a sum of the results from each tree for each row
+    finalResult = []
+
+    for i in summedResult:
+        # TODO: Tiebreaker
+        # TODO: What if you use an odd number of trees
+        if i < len(tree_list)/2:
+            finalResult.append(0)
+        else:  # i >= len(tree_list)/2:
+            finalResult.append(1)
+
+    return finalResult
 
 
 if __name__ == "__main__":
