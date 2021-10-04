@@ -49,7 +49,8 @@ def tree_grow_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
 
 def tree_pred_b(tree_list, x):
     allResults = [tree_pred(x, tree) for tree in tree_list]
-    summedResult = list(map(sum, zip(*allResults)))  # get a sum of the results from each tree for each row
+    allResultsArray = np.array(allResults)
+    summedResult = sum(allResultsArray).tolist()  # get a sum of the results from each tree for each row
     finalResult = []
 
     # since the outputs are binary, we can use the sum of the output and compare it against the number of models used
