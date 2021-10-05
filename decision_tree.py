@@ -46,20 +46,17 @@ class DescisionTree:
         featureIndices.sort()
         # Choose random indices (columns of x), of size nfeat, without replacement
 
-        # this is unpythonic jank
-        # but it works
-        # :)
         possibleSplits = []
+        index = 0
         for i in range(x.shape[1]):
-            flag = False
-            for index in featureIndices:
-                if i == index:
-                    possibleSplits.append(self.getSplitsPerFeature(x, index))
-                    flag = True
-                    break
-            if flag:
-                continue
-            possibleSplits.append(np.empty(0))
+            if index < len(featureIndices):
+                if i == featureIndices[index]:
+                    possibleSplits.append(self.getSplitsPerFeature(x, featureIndices[0]))
+                    index += 1
+                else:
+                    possibleSplits.append(np.empty(0))
+            else:
+                possibleSplits.append(np.empty(0))
 
         # Store it in a tuple for easy access
         allCombinations = [(index, splitValue) for index in featureIndices for splitValue in possibleSplits[index]]
