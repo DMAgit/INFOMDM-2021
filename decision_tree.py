@@ -45,13 +45,16 @@ class DescisionTree:
         featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
         featureIndices.sort()
         # Choose random indices (columns of x), of size nfeat, without replacement
+        # We use this to choose the nfeat features we are interested in
 
+        # We want a list of possible splits which contains the values of the splits for features which we are interested
+        # in and empty arrays for the features we are not interested in
         possibleSplits = []
         index = 0
         for i in range(x.shape[1]):
-            if index < len(featureIndices):
+            if index < len(featureIndices):  # make sure that we don't get an OutOfBounds error
                 if i == featureIndices[index]:
-                    possibleSplits.append(self.getSplitsPerFeature(x, featureIndices[0]))
+                    possibleSplits.append(self.getSplitsPerFeature(x, featureIndices[index]))
                     index += 1
                 else:
                     possibleSplits.append(np.empty(0))
