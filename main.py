@@ -62,8 +62,7 @@ def tree_pred_b(tree_list, x):
     # otherwise, most models voted 0, so assign it as a 0
     for i in summedResult:
         # TODO: Tiebreaker
-        # TODO: What if you use an odd number of trees
-        if i > len(tree_list)/2:
+        if i > int(len(tree_list)/2):
             finalResult.append(1)
         else:
             finalResult.append(0)
