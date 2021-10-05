@@ -37,31 +37,23 @@ class DescisionTree:
         assert x.shape[0] == y.shape[0]
         # Check that nfeat is more than 0 and isn't a number greater than the number of columns in the data
         assert 0 < nfeat <= x.shape[1]
+        
 
         self.rootNode = self.grow_tree(x, y)
 
     # Get all the possible splits, for all the features
     def getPossibleSplits(self, x):
-        featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
-        featureIndices.sort()
         # Choose random indices (columns of x), of size nfeat, without replacement
         # We use this to choose the nfeat features we are interested in
+        featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
+        featureIndices.sort()        
 
         # We want a list of possible splits which contains the values of the splits for features which we are interested
-        # in and empty arrays for the features we are not interested in
-        possibleSplits = []
-        index = 0
-        for i in range(x.shape[1]):
-            if index < len(featureIndices):  # make sure that we don't get an OutOfBounds error
-                if i == featureIndices[index]:
-                    possibleSplits.append(self.getSplitsPerFeature(x, featureIndices[index]))
-                    index += 1
-                else:
-                    possibleSplits.append(np.empty(0))
-            else:
-                possibleSplits.append(np.empty(0))
+        # in and None values for the features we are not interested in
+        possibleSplits = np.full(x.shape[1],None,dtype=object)
+        possibleSplits[featureIndices] = [self.getSplitsPerFeature(x, index) for index in featureIndices]
 
-        # Store it in a tuple for easy access
+        # Store it in a tuple for easy access TODO add explanation
         allCombinations = [(index, splitValue) for index in featureIndices for splitValue in possibleSplits[index]]
         return allCombinations
 

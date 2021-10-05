@@ -5,6 +5,8 @@ from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
 from statistics import mode
 from sklearn.metrics import accuracy_score
+from functools import wraps
+from time import time
 
 DATAPATH = 'data/pimaIndians.txt'
 DELIMETER = ','
@@ -25,11 +27,6 @@ def main():
     # Visualise the tree in the console
     # visualiser = Visualiser()
     # visualiser.visualiseTree(tree)
-
-
-    
-    # print(predictions)
-
 
 # Construct and return the tree
 def tree_grow(x, y, nmin: int, minleaf: int, nfeat: int):
@@ -54,21 +51,29 @@ def tree_grow_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
 def tree_pred_b(tree_list, x):
     allResults = [tree_pred(x, tree) for tree in tree_list]
     allResultsArray = np.array(allResults)
-    summedResult = sum(allResultsArray).tolist()  # get a sum of the results from each tree for each row
-    finalResult = []
 
-    # since the outputs are binary, we can use the sum of the output and compare it against the number of models used
-    # if it is more than half of the models, most models voted 1, so we assign it as such
-    # otherwise, most models voted 0, so assign it as a 0
-    for i in summedResult:
-        # TODO: Tiebreaker
-        if i > int(len(tree_list)/2):
-            finalResult.append(1)
-        else:
-            finalResult.append(0)
-
+    #Get the total votes for classifing 1
+    summedResults = allResultsArray.sum(axis=0)  # get a sum of the results from each tree for each row
+    
+    #If the sum is bigger than half the dataset (rounded down for tiebreakers) then it is the majority
+    finalResult = summedResults > len(allResults) // 2
+    
     return finalResult
 
+
+#For debugging
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print('func:%r took: %2.4f sec' % \
+          (f.__name__, te-ts))
+        return result
+    return wrap
+
+@timing
 def test_pred_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
     treeList = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
     baggingPredictions = tree_pred_b(treeList, x)
