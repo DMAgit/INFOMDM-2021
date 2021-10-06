@@ -2,7 +2,6 @@ import numpy as np
 from typing import List, Any
 
 from decision_tree import DescisionTree
-from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from functools import wraps
@@ -48,7 +47,7 @@ def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int)
     return tree
 
 
-def tree_pred(x: np.ndarray, tr: DescisionTree) -> Any:
+def tree_pred(x: np.ndarray, tr: DescisionTree) -> list:
     predictedLabels = tr.predict(x)
     return predictedLabels
 

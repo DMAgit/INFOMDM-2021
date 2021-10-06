@@ -43,7 +43,7 @@ class DescisionTree:
         self.rootNode = self.grow_tree(x, y)
 
     # Get all the possible splits, for all the features
-    def getPossibleSplits(self, x) -> List[Tuple[Any, Any]]:
+    def getPossibleSplits(self, x) -> List[Tuple[int, float]]:
         # Choose random indices (columns of x), of size nfeat, without replacement
         # We use this to choose the nfeat features we are interested in
         featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
