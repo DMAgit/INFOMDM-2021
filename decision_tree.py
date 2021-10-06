@@ -37,7 +37,6 @@ class DescisionTree:
         assert x.shape[0] == y.shape[0]
         # Check that nfeat is more than 0 and isn't a number greater than the number of columns in the data
         assert 0 < nfeat <= x.shape[1]
-        
 
         self.rootNode = self.grow_tree(x, y)
 
@@ -46,11 +45,11 @@ class DescisionTree:
         # Choose random indices (columns of x), of size nfeat, without replacement
         # We use this to choose the nfeat features we are interested in
         featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
-        featureIndices.sort()        
+        featureIndices.sort()
 
         # We want a list of possible splits which contains the values of the splits for features which we are interested
         # in and None values for the features we are not interested in
-        possibleSplits = np.full(x.shape[1],None,dtype=object)
+        possibleSplits = np.full(x.shape[1], None, dtype=object)
         possibleSplits[featureIndices] = [self.getSplitsPerFeature(x, index) for index in featureIndices]
 
         # Store it in a tuple for easy access TODO add explanation
