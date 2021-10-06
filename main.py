@@ -91,7 +91,7 @@ def timing(f: Any) -> Any:
 
 
 @timing
-def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int):
+def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int) -> None:
     tree = tree_grow(x_train, y_train, nmin, minleaf, nfeat)
     treePrediction = tree_pred(x_test, tree)
     print(accuracy_score(y_test, treePrediction))
