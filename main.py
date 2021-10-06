@@ -1,5 +1,6 @@
 import numpy as np
-# import pandas as pd
+from typing import List, Any
+
 from decision_tree import DescisionTree
 from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
@@ -12,7 +13,7 @@ DELIMETER = ';'
 SKIP_HEADER = True
 
 
-def main():
+def main() -> None:
     # Get the training data, and split the values from the labels
     eclipse_data_train = np.genfromtxt(DATAPATH, delimiter=DELIMETER, skip_header=SKIP_HEADER)
     x_train = eclipse_data_train[:, 2:44]  # we want all of this slice other than 3
@@ -41,26 +42,26 @@ def main():
 
 
 # Construct and return the tree
-def tree_grow(x, y, nmin: int, minleaf: int, nfeat: int):
+def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int) -> DescisionTree:
     tree = DescisionTree()
     tree.construct(x, y, nmin, minleaf, nfeat)
     return tree
 
 
-def tree_pred(x, tr):
+def tree_pred(x: np.ndarray, tr: DescisionTree) -> Any:
     predictedLabels = tr.predict(x)
     return predictedLabels
 
 
 # Random forests
-def tree_grow_b(x, y, nmin: int, minleaf: int, nfeat: int, m: int):
+def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> List[DescisionTree]:
     tree_list = []
     for i in range(m):
         tree_list.append(tree_grow(x, y, nmin, minleaf, nfeat))
     return tree_list  # list of tree objects of len m
 
 
-def tree_pred_b(tree_list, x):
+def tree_pred_b(tree_list: List, x: np.ndarray) -> bool:
     allResults = [tree_pred(x, tree) for tree in tree_list]
     allResultsArray = np.array(allResults)
 
@@ -74,9 +75,9 @@ def tree_pred_b(tree_list, x):
 
 
 # For debugging
-def timing(f):
+def timing(f: Any) -> Any:
     @wraps(f)
-    def wrap(*args, **kw):
+    def wrap(*args, **kw) -> Any:
         ts = time()
         result = f(*args, **kw)
         te = time()
@@ -88,7 +89,7 @@ def timing(f):
 
 
 @timing
-def test_pred_b(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int, m: int):
+def test_pred_b(x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> None:
     treeList = tree_grow_b(x_train, y_train, nmin, minleaf, nfeat, m)
     baggingPredictions = tree_pred_b(treeList, x_test)
     print("m: ", m)

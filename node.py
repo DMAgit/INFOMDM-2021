@@ -26,7 +26,7 @@ class Node:
         self.splitValue = splitValue
 
     # Get the majority class label for this node
-    def setFinalClassLabel(self, labels):
+    def setFinalClassLabel(self, labels) -> None:
         self.trainingLabels = labels
 
         positiveAmount = np.sum(labels)
@@ -39,7 +39,7 @@ class Node:
             self.finalClassLabel = 0
 
     # Make the prediction with a datarow
-    def predict(self, dataRow):
+    def predict(self, dataRow) -> None:
         if self.index is None:  # Leaf node
             return self.finalClassLabel
 
