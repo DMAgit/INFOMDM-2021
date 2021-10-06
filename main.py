@@ -30,9 +30,9 @@ def main() -> None:
 
     y_test = eclipse_data_test[:, 3]
     # we want y to be a boolean (we try to predict whether there is or is not a bug, not how many there are)
-    y_test[y_test > 0] = 1  # so we change all non-0 values to 1 https://stackoverflow.com/a/19666680/14598178
+    y_test[y_test > 0] = 1  # so we change all non-0 values to 1
 
-    test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 41, 1)  # for Analysis 1
+    test_pred(x_train, y_train, x_test, y_test, 15, 5, 41)  # for Analysis 1
     test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 41, 100)  # for Analysis 2
     test_pred_b(x_train, y_train, x_test, y_test, 20, 5, 6, 100)  # for Analysis 3
 
@@ -57,7 +57,10 @@ def tree_pred(x: np.ndarray, tr: DescisionTree) -> Any:
 def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> List[DescisionTree]:
     tree_list = []
     for i in range(m):
-        tree_list.append(tree_grow(x, y, nmin, minleaf, nfeat))
+        index = np.random.choice(x.shape[0], x.shape[0], replace=True)
+        # Get an array of indexes of size x (with replacement)
+        tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
+        # Use the index to subset x and y
     return tree_list  # list of tree objects of len m
 
 
@@ -86,6 +89,14 @@ def timing(f: Any) -> Any:
         return result
 
     return wrap
+
+
+@timing
+def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int):
+    tree = tree_grow(x_train, y_train, nmin, minleaf, nfeat)
+    treePrediction = tree_pred(x_test, tree)
+    print(accuracy_score(y_test, treePrediction))
+    print(confusion_matrix(y_test, treePrediction))
 
 
 @timing
