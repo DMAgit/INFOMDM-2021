@@ -6,8 +6,13 @@ import numpy as np
 import sys
 
 
-# Calculate the gini index as shown in the lecture slides
 def gini_index(labels: np.ndarray) -> float:
+    """
+    Calculate the gini index as shown in the lecture slides
+
+    :param labels: np.ndarray
+    :return: Gini index (float)
+    """
     totalTrue = np.sum(labels)  # Get the amount of true labels
     probTrue = totalTrue / labels.shape[0]  # Calculate the proportion of true labels
 
@@ -21,14 +26,27 @@ class DescisionTree:
         self.minleaf = None
         self.nfeat = None
 
-    # Make the predictions
     def predict(self, dataRows: np.ndarray) -> list:
+        """
+        Make the predictions
+
+        :param dataRows: rows of the data to make predictions on
+        :return: list of predictions
+        """
         resultLabels = [self.rootNode.predict(row) for row in dataRows]
         return resultLabels
 
-    # Construct the trees
     def construct(self, x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int) -> None:
+        """
+        Construct the trees
 
+        :param x: array of features and their values
+        :param y: labels
+        :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
+        :param minleaf: minimum number of observations required for a leaf node
+        :param nfeat: the number of features that should be considered for each split
+        :return: None
+        """
         # Store the parameters
         self.nmin = nmin
         self.minleaf = minleaf
@@ -42,8 +60,13 @@ class DescisionTree:
 
         self.rootNode = self.grow_tree(x, y)
 
-    # Get all the possible splits, for all the features
-    def getPossibleSplits(self, x) -> List[Tuple[Any, Any]]:
+    def getPossibleSplits(self, x) -> List[Tuple[int, float]]:
+        """
+        Get all the possible splits, for all the features
+
+        :param x: array of features and their values
+        :return: combinations of possible splits
+        """
         # Choose random indices (columns of x), of size nfeat, without replacement
         # We use this to choose the nfeat features we are interested in
         featureIndices = np.random.choice(range(x.shape[1]), size=self.nfeat, replace=False)
@@ -58,15 +81,27 @@ class DescisionTree:
         allCombinations = [(index, splitValue) for index in featureIndices for splitValue in possibleSplits[index]]
         return allCombinations
 
-    # Get all possible splits in a single feature (halfway between consecutive values because the data is all numerical)
     def getSplitsPerFeature(self, x: np.ndarray, featureIndex: np.int32) -> float:
+        """
+        Get all possible splits in a single feature
+        (halfway between consecutive values because the data is all numerical)
+
+        :param x: array of features and their values
+        :param featureIndex: array of indices of features to consider
+        :return: featureValuesAveraged
+        """
         featureValuesSorted = np.sort(np.unique(x[:, featureIndex]))
         featureValuesAveraged = (featureValuesSorted[0:-1] + featureValuesSorted[1:]) / 2
 
         return featureValuesAveraged
 
-    # Returns the best splitCombination according to the impurity function
     def getBestSplit(self, x: np.ndarray, y: np.ndarray, allCombinations: list) -> Union[Tuple[int, float], None]:
+        """
+        :param x: array of features and their values
+        :param y: labels
+        :param allCombinations: list of combinations of possible splits
+        :return: the best splitCombination according to the impurity function
+        """
         allScores = [self.GetCurrentScore(x, y, combination) for combination in allCombinations]
         bestCombination = allCombinations[np.argmin(allScores)]
 
@@ -75,9 +110,18 @@ class DescisionTree:
             return None
         return bestCombination
 
-    # Returns the delta i, without calculating the impurity of current node (is constant), so you want the smallest one
     def GetCurrentScore(self, x, y, combination) -> Union[float, int]:
-        # TODO probably more efficient to not make the split itself, but use the method as described in the assignment get started
+        """
+        Returns the delta i, without calculating the impurity of current node (is constant),
+        so you want the smallest one
+
+        :param x: array of features and their values
+        :param y: labels
+        :param combination: split combination
+        :return: delta i
+        """
+        # TODO probably more efficient to not make the split itself, but use the method as described
+        #  in the assignment get started
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, combination)
 
         # Check the minleaf restriction
@@ -86,9 +130,14 @@ class DescisionTree:
 
         return gini_index(yLeft) * len(yLeft) / len(y) + gini_index(yRight) * len(yRight) / len(y)
 
-    # Returns the split dataset and labels according to combination
     def getCurrentSplit(self, x: np.ndarray, y: np.ndarray, combination: Tuple[int, float]) ->\
             Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """
+        :param x: array of features and their values
+        :param y: labels
+        :param combination: split combination
+        :return: split dataset and labels according to combination
+        """
         featureIndex, splitValue = combination
         # Get the masks for easy access
         leftMask = x[:, featureIndex] < splitValue
@@ -96,8 +145,14 @@ class DescisionTree:
 
         return x[leftMask], x[rightMask], y[leftMask], y[rightMask]
 
-    # Grow the tree (recursive function)
     def grow_tree(self, x: np.ndarray, y: np.ndarray) -> Node:
+        """
+        Grow the tree (recursive function)
+
+        :param x: array of features and their values
+        :param y: labels
+        :return: currentNode
+        """
         currentNode = Node()
         currentNode.setFinalClassLabel(y)  # Get the majority vote for each Node
 

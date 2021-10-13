@@ -2,7 +2,6 @@ import numpy as np
 from typing import List, Any
 
 from decision_tree import DescisionTree
-from visualiser import Visualiser
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from functools import wraps
@@ -13,7 +12,7 @@ DELIMETER = ';'
 SKIP_HEADER = True
 
 
-def main() -> None:
+def main():
     # Get the training data, and split the values from the labels
     eclipse_data_train = np.genfromtxt(DATAPATH, delimiter=DELIMETER, skip_header=SKIP_HEADER)
     x_train = eclipse_data_train[:, 2:44]  # we want all of this slice other than 3
@@ -54,18 +53,46 @@ def get_training_data(x_train, y_train, x_test, y_test):
 
 # Construct and return the tree
 def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int) -> DescisionTree:
+    """
+    Construct the tree
+
+    :param x: array of features and their values
+    :param y: labels
+    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
+    :param minleaf: minimum number of observations required for a leaf node
+    :param nfeat: the number of features that should be considered for each split
+    :return: Trained decision tree
+    """
     tree = DescisionTree()
     tree.construct(x, y, nmin, minleaf, nfeat)
     return tree
 
 
-def tree_pred(x: np.ndarray, tr: DescisionTree) -> Any:
+def tree_pred(x: np.ndarray, tr: DescisionTree) -> list:
+    """
+    Make predictions with a tree
+
+    :param x: array of features and their values to be predicted on
+    :param tr: Decision tree to make the prediction with
+    :return: Predictions
+    """
     predictedLabels = tr.predict(x)
     return predictedLabels
 
 
 # Random forests
 def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> List[DescisionTree]:
+    """
+    Construct m number of trees (for bagging/rf)
+
+    :param x: array of features and their values
+    :param y: labels
+    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
+    :param minleaf: minimum number of observations required for a leaf node
+    :param nfeat: the number of features that should be considered for each split
+    :param m: number of trees to use for prediction
+    :return: List of trained decision trees
+    """
     tree_list = []
     for i in range(m):
         index = np.random.choice(x.shape[0], x.shape[0], replace=True)
@@ -76,6 +103,13 @@ def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: in
 
 
 def tree_pred_b(tree_list: List, x: np.ndarray) -> bool:
+    """
+    Make predictions with a list of trees
+
+    :param tree_list: list of decision trees to make predictions with
+    :param x: array of features and their values (to be predicted on)
+    :return: Predictions
+    """
     allResults = [tree_pred(x, tree) for tree in tree_list]
     allResultsArray = np.array(allResults)
 
@@ -106,7 +140,8 @@ precisions = []
 recalls = []
 confusion_matrices = []
 
-def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int):
+@timing
+def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int) -> None:
     tree = tree_grow(x_train, y_train, nmin, minleaf, nfeat)
     treePrediction = tree_pred(x_test, tree)
     accuracies.append(accuracy_score(y_test, treePrediction))
