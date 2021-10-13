@@ -41,13 +41,16 @@ def main():
 
 def get_training_data(x_train, y_train, x_test, y_test):
     for i in range(100):
-        print("Iteration:",i)
-        test_pred(x_train, y_train, x_test, y_test, 15, 5, 41)  # for Analysis 1
+        t1 = time()
+        test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 6, 100)  # for Analysis 3
+        print("Iteration",i," took",time() - t1, " seconds")
+        
 
     print("accuracies", accuracies)
     print("precisions", precisions)
     print("recalls", recalls)
     print("confusion matrices", confusion_matrices)
+    #test_pred(x_train, y_train, x_test, y_test, 15, 5, 41)  # for Analysis 1
     #test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 41, 100)  # for Analysis 2
     #test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 6, 100)  # for Analysis 3
 
@@ -140,7 +143,6 @@ precisions = []
 recalls = []
 confusion_matrices = []
 
-@timing
 def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int) -> None:
     tree = tree_grow(x_train, y_train, nmin, minleaf, nfeat)
     treePrediction = tree_pred(x_test, tree)
@@ -153,9 +155,10 @@ def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: 
 def test_pred_b(x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> None:
     treeList = tree_grow_b(x_train, y_train, nmin, minleaf, nfeat, m)
     baggingPredictions = tree_pred_b(treeList, x_test)
-    print("m: ", m)
-    print(accuracy_score(y_test, baggingPredictions))
-    print(confusion_matrix(y_test, baggingPredictions))
+    accuracies.append(accuracy_score(y_test, baggingPredictions))
+    precisions.append(precision_score(y_test, baggingPredictions))
+    recalls.append(recall_score(y_test,baggingPredictions))
+    confusion_matrices.append(confusion_matrix(y_test, baggingPredictions).tolist())
 
 
 if __name__ == "__main__":
