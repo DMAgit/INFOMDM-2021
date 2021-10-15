@@ -23,7 +23,8 @@ def main():
     # we want y to be a boolean (we try to predict whether there is or is not a bug, not how many there are)
     y_train[y_train > 0] = 1  # so we change all non-0 values to 1 https://stackoverflow.com/a/19666680/14598178
     # Get the test data
-    eclipse_data_test = np.genfromtxt('data/eclipse-metrics-packages-3.0.csv', delimiter=DELIMETER, skip_header=SKIP_HEADER)
+    eclipse_data_test = np.genfromtxt('data/eclipse-metrics-packages-3.0.csv', delimiter=DELIMETER,
+                                      skip_header=SKIP_HEADER)
     x_test = eclipse_data_test[:, 2:44]  # we want all of this slice other than 3
     x_test = np.delete(x_test, 1, 1)  # can this and the above be done in 1 line?
 
@@ -33,26 +34,25 @@ def main():
 
     get_training_data(x_train, y_train, x_test, y_test)
 
-    
-
     # Visualise the tree in the console
     # visualiser = Visualiser()
     # visualiser.visualiseTree(tree)
+
 
 def get_training_data(x_train, y_train, x_test, y_test):
     for i in range(100):
         t1 = time()
         test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 6, 100)  # for Analysis 3
-        print("Iteration",i," took",time() - t1, " seconds")
-        
+        print("Iteration", i, " took", time() - t1, " seconds")
 
     print("accuracies", accuracies)
     print("precisions", precisions)
     print("recalls", recalls)
     print("confusion matrices", confusion_matrices)
-    #test_pred(x_train, y_train, x_test, y_test, 15, 5, 41)  # for Analysis 1
-    #test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 41, 100)  # for Analysis 2
-    #test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 6, 100)  # for Analysis 3
+    # test_pred(x_train, y_train, x_test, y_test, 15, 5, 41)  # for Analysis 1
+    # test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 41, 100)  # for Analysis 2
+    # test_pred_b(x_train, y_train, x_test, y_test, 15, 5, 6, 100)  # for Analysis 3
+
 
 # Construct and return the tree
 def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int) -> DescisionTree:
@@ -138,26 +138,29 @@ def timing(f: Any) -> Any:
 
     return wrap
 
+
 accuracies = []
 precisions = []
 recalls = []
 confusion_matrices = []
+
 
 def test_pred(x_train, y_train, x_test, y_test, nmin: int, minleaf: int, nfeat: int) -> None:
     tree = tree_grow(x_train, y_train, nmin, minleaf, nfeat)
     treePrediction = tree_pred(x_test, tree)
     accuracies.append(accuracy_score(y_test, treePrediction))
     precisions.append(precision_score(y_test, treePrediction))
-    recalls.append(recall_score(y_test,treePrediction))
+    recalls.append(recall_score(y_test, treePrediction))
     confusion_matrices.append(confusion_matrix(y_test, treePrediction).tolist())
 
 
-def test_pred_b(x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> None:
+def test_pred_b(x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray, nmin: int,
+                minleaf: int, nfeat: int, m: int) -> None:
     treeList = tree_grow_b(x_train, y_train, nmin, minleaf, nfeat, m)
     baggingPredictions = tree_pred_b(treeList, x_test)
     accuracies.append(accuracy_score(y_test, baggingPredictions))
     precisions.append(precision_score(y_test, baggingPredictions))
-    recalls.append(recall_score(y_test,baggingPredictions))
+    recalls.append(recall_score(y_test, baggingPredictions))
     confusion_matrices.append(confusion_matrix(y_test, baggingPredictions).tolist())
 
 
