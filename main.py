@@ -6,6 +6,77 @@ DELIMETER = ';'
 SKIP_HEADER = True
 
 
+# Construct and return the tree
+def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int):
+    """
+    Construct the tree
+
+    :param x: array of features and their values
+    :param y: labels
+    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
+    :param minleaf: minimum number of observations required for a leaf node
+    :param nfeat: the number of features that should be considered for each split
+    :return: Trained decision tree
+    """
+    tree = DecisionTree()
+    tree.construct(x, y, nmin, minleaf, nfeat)
+    return tree
+
+
+def tree_pred(x: np.ndarray, tr) -> list:
+    """
+    Make predictions with a tree
+
+    :param x: array of features and their values to be predicted on
+    :param tr: Decision tree to make the prediction with
+    :return: Predictions
+    """
+    predictedLabels = tr.predict(x)
+    return predictedLabels
+
+
+# Random forests
+def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> List:
+    """
+    Construct m number of trees (for bagging/rf)
+
+    :param x: array of features and their values
+    :param y: labels
+    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
+    :param minleaf: minimum number of observations required for a leaf node
+    :param nfeat: the number of features that should be considered for each split
+    :param m: number of trees to use for prediction
+    :return: List of trained decision trees
+    """
+    tree_list = []
+    for i in range(m):
+        index = np.random.choice(x.shape[0], x.shape[0], replace=True)
+        # Get an array of indexes of size x (with replacement)
+        tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
+        # Use the index to subset x and y
+    return tree_list  # list of tree objects of len m
+
+
+def tree_pred_b(tree_list: List, x: np.ndarray) -> bool:
+    """
+    Make predictions with a list of trees
+
+    :param tree_list: list of decision trees to make predictions with
+    :param x: array of features and their values (to be predicted on)
+    :return: Predictions
+    """
+    allResults = [tree_pred(x, tree) for tree in tree_list]
+    allResultsArray = np.array(allResults)
+
+    # Get the total votes for classifying 1
+    summedResults = allResultsArray.sum(axis=0)  # get a sum of the results from each tree for each row
+
+    # If the sum is bigger than half the dataset (rounded down for tiebreakers) then it is the majority
+    finalResult = summedResults > len(allResults) // 2
+
+    return finalResult
+
+
 class Node:
     def __init__(self) -> None:
         self.left = None
@@ -262,77 +333,6 @@ def main():
     # Tree_1 = tree_grow(x_train, y_train, 15, 5, 41)  # analysis 1
     # Tree_2 = tree_grow_b(x_train, y_train, 15, 5, 41, 100)  # analysis 2
     # Tree_3 = tree_grow_b(x_train, y_train, 15, 5, 6, 100)  # analysis 3
-
-
-# Construct and return the tree
-def tree_grow(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int) -> DecisionTree:
-    """
-    Construct the tree
-
-    :param x: array of features and their values
-    :param y: labels
-    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
-    :param minleaf: minimum number of observations required for a leaf node
-    :param nfeat: the number of features that should be considered for each split
-    :return: Trained decision tree
-    """
-    tree = DecisionTree()
-    tree.construct(x, y, nmin, minleaf, nfeat)
-    return tree
-
-
-def tree_pred(x: np.ndarray, tr: DecisionTree) -> list:
-    """
-    Make predictions with a tree
-
-    :param x: array of features and their values to be predicted on
-    :param tr: Decision tree to make the prediction with
-    :return: Predictions
-    """
-    predictedLabels = tr.predict(x)
-    return predictedLabels
-
-
-# Random forests
-def tree_grow_b(x: np.ndarray, y: np.ndarray, nmin: int, minleaf: int, nfeat: int, m: int) -> List[DecisionTree]:
-    """
-    Construct m number of trees (for bagging/rf)
-
-    :param x: array of features and their values
-    :param y: labels
-    :param nmin: minimum number of observations that a node must contain, for it to be allowed to be split
-    :param minleaf: minimum number of observations required for a leaf node
-    :param nfeat: the number of features that should be considered for each split
-    :param m: number of trees to use for prediction
-    :return: List of trained decision trees
-    """
-    tree_list = []
-    for i in range(m):
-        index = np.random.choice(x.shape[0], x.shape[0], replace=True)
-        # Get an array of indexes of size x (with replacement)
-        tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
-        # Use the index to subset x and y
-    return tree_list  # list of tree objects of len m
-
-
-def tree_pred_b(tree_list: List, x: np.ndarray) -> bool:
-    """
-    Make predictions with a list of trees
-
-    :param tree_list: list of decision trees to make predictions with
-    :param x: array of features and their values (to be predicted on)
-    :return: Predictions
-    """
-    allResults = [tree_pred(x, tree) for tree in tree_list]
-    allResultsArray = np.array(allResults)
-
-    # Get the total votes for classifying 1
-    summedResults = allResultsArray.sum(axis=0)  # get a sum of the results from each tree for each row
-
-    # If the sum is bigger than half the dataset (rounded down for tiebreakers) then it is the majority
-    finalResult = summedResults > len(allResults) // 2
-
-    return finalResult
 
 
 if __name__ == "__main__":
