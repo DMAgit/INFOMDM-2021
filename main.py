@@ -1,3 +1,8 @@
+"""
+Created on October 13 2021
+@authors: Simen van Herpt, Dimitar Angelov, Angel Temelko
+@StudentIDs: 595510 ,2339463, 8221113
+"""
 import numpy as np
 from typing import List, Tuple, Union
 
@@ -93,16 +98,33 @@ class Node:
 
     # Set the childNodes
     def setChildNodes(self, left, right) -> None:
+        """
+        Sets value to children nodes
+
+        :param left: left child of the current node
+        :param rigth: right child of the current node
+        """
         self.left = left
         self.right = right
 
     # Set the splitValues
     def setSplitValues(self, index, splitValue) -> None:
+        """
+        Sets the split values for the current node
+
+        :param index: The index of node
+        :param splitValue: The splitvalue of the node
+        """
         self.index = index
         self.splitValue = splitValue
 
     # Get the majority class label for this node
     def setFinalClassLabel(self, labels) -> None:
+        """
+        Sets the final class label
+
+        :param lables: list of lables
+        """
         self.trainingLabels = labels
 
         positiveAmount = np.sum(labels)
@@ -115,6 +137,11 @@ class Node:
 
     # Make the prediction with a datarow
     def predict(self, dataRow) -> None:
+        """
+        Make predictions with a datarow
+
+        :param dataRow: Delta values
+        """
         if self.index is None:  # Leaf node
             return self.finalClassLabel
 
