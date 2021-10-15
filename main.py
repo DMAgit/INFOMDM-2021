@@ -37,7 +37,6 @@ class Node:
         positiveAmount = np.sum(labels)
         negativeAmount = len(labels) - positiveAmount
 
-        # TODO figure out tie breaker
         if positiveAmount > negativeAmount:
             self.finalClassLabel = 1
         else:
@@ -130,7 +129,7 @@ class DecisionTree:
         possibleSplits = np.full(x.shape[1], None, dtype=object)
         possibleSplits[featureIndices] = [self.getSplitsPerFeature(x, index) for index in featureIndices]
 
-        # Store it in a tuple for easy access TODO add explanation
+        # Store it in a tuple for easy access
         allCombinations = [(index, splitValue) for index in featureIndices for splitValue in possibleSplits[index]]
         return allCombinations
 
@@ -173,8 +172,6 @@ class DecisionTree:
         :param combination: split combination
         :return: delta i
         """
-        # TODO probably more efficient to not make the split itself, but use the method as described
-        #  in the assignment get started
         xLeft, xRight, yLeft, yRight = self.getCurrentSplit(x, y, combination)
 
         # Check the minleaf restriction
